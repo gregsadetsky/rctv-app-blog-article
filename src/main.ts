@@ -29,11 +29,30 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // take the last message (which is the most recent one), extract the url, and redirect there!!!!
-      const lastMessage = blogMessages[blogMessages.length - 1];
-      const url = lastMessage.content.match(/<a href="([^"]+)">/)[1];
-      setTimeout(() => {
-        window.location.href = url;
+      // at this point, we have some blogMessages with some urls in them
+      // some of them MIGHT lead to http urls. if we (as the iframed app) try
+      // to set window.location.href but the URL is http, then the setting of the new url
+      // will fail and we'll still be up and running...
+
+      // filter out urls to get them in a list
+      let allPotentialUrls = blogMessages.map(
+        (message) => message.content.match(/<a href="([^"]+)">/)[1]
+      );
+
+      const tryingToSetUrlInterval = setInterval(() => {
+        // if we're still here, we haven't redirected yet. let's try to redirect
+        // to the first url in the list. if it's http, it'll fail and we'll keep trying
+        // until we find a https url
+        if (allPotentialUrls.length === 0) {
+          clearInterval(tryingToSetUrlInterval);
+          document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
+            <h1>NO HTTPS URLS FOUND (huh??)</h1>
+          `;
+          return;
+        }
+        // get latest url from the list -- if we're not redirected to it,
+        // this `window.location.href =` will not do anything
+        window.location.href = allPotentialUrls.pop();
       }, 2000);
     });
   });
