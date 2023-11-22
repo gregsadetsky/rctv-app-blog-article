@@ -39,6 +39,10 @@ document.addEventListener("DOMContentLoaded", function () {
         (message) => message.content.match(/<a href="([^"]+)">/)[1]
       );
 
+      // shuffle them, because shuffling is fun/fair
+      // suggestion by @stcucufa !
+      allPotentialUrls.sort((a, b) => (Math.random() > 0.5 ? 1 : -1));
+
       const tryingToSetUrlInterval = setInterval(() => {
         // if we're still here, we haven't redirected yet. let's try to redirect
         // to the first url in the list. if it's http, it'll fail and we'll keep trying
